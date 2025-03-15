@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "backend": "nodemon backend/index.js"
+    "backend": "nodemon backend/index.js",
+    "fullstack": "concurrently \"npm run backend\" \"cd frontend && npm run dev\""
   },
   "author": "moses karani",
   "license": "ISC",
@@ -16,6 +17,7 @@
     "@ngrok/ngrok": "^1.4.1",
     "axios": "^1.8.2",
     "bcryptjs": "^3.0.1",
+    "concurrently": "^9.1.2",
     "connect-mongodb-session": "^5.0.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

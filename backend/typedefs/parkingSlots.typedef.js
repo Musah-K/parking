@@ -15,12 +15,15 @@ type Query {
     parkingSlot(slotNumber:Int!):ParkingSlot
     allParkingSlots:[ParkingSlot!]!
     availableSlots(available:Boolean!):[ParkingSlot!]!
+    userSlots:[ParkingSlot!]!
 }
 
 type Mutation {
     createParkingSlot: [ParkingSlot!]!
     updateParkingSlot(_id:ID!,input:updateParkingSlotInput!): ParkingSlot!
     deleteParkingSlot(_id:ID!): deleteResponse!
+    removeExpiredSlots:UpdateResponse!
+    
 }
 
 
@@ -41,6 +44,12 @@ input updateParkingSlotInput {
 
 type deleteResponse {
     message: String!
+}
+
+type UpdateResponse {
+    acknowledged: Boolean!
+    matchedCount: Int!
+    modifiedCount: Int!
 }
 
 `

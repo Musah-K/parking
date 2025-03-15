@@ -55,20 +55,12 @@ const userResolvers = {
         },
         loginUser: async (_, { input }, context) => {
             try {
-                console.log("Login attempt for phone:", input.phone);
-        
-                // Convert phone to a number
-        
-                // Check if user exists in DB
+                
                 const existingUser = await User.findOne({ phone: input.phone });
                 if (!existingUser) {
                     console.log("User not found in database.");
                     throw new Error("User not founk.");
                 }
-                
-                // console.log(input.phone.toString());
-        
-                // Authenticate using GraphQL Passport
                 const { user, info } = await context.authenticate("graphql-local", { username: input.phone.toString(), password: input.password });
         
                 if (!user) {
@@ -76,10 +68,7 @@ const userResolvers = {
                     throw new Error("Invalid login credentials");
                 }
         
-                // Log in user
                 await context.login(user);
-        
-                console.log("User logged in successfully:", user);
                 return user;
             } catch (error) {
                 console.error("Login error:", error.message);

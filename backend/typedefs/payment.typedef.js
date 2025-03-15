@@ -11,9 +11,9 @@ const paymentTypedef = `#graphql
     }
 
     input CreatePaymentInput {
-        amount: Int
-        days: Int
-        startDate: String
+        validFrom: String!
+        validTill: String!
+        days: Int!
     }
 
     input UpdatePaymentStatusInput {

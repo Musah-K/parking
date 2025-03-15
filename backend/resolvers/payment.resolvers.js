@@ -76,6 +76,8 @@ const paymentResolvers = {
 
   Mutation: {
     async createPayment(_, { input }, context) {
+      console.log("Received input:", input);
+
       const user = await context.getUser();
       if (!user) throw new Error("User not authenticated");
       const parkingSlotsAvailable = await ParkingSlot.find({ isAvailable: true });
@@ -83,14 +85,9 @@ const paymentResolvers = {
       const parkingSlot = parkingSlotsAvailable[0];
 
 
-      const { days,startDate } = input;
+      const { days,validFrom, validTill } = input;
       const amount = days * 1;
-      const validFrom =!startDate? new Date(): new Date(startDate);
-      validFrom.setHours(0, 0, 0, 0);
-      const validTill = new Date(validFrom);
-      validTill.setDate(validTill.getDate() + days);
-      validTill.setHours(0, 0, 0,0);
-
+      
       const phone = user.phone;
       console.log("User ID:", user._id);
 
@@ -105,12 +102,12 @@ const paymentResolvers = {
 
       console.log("STK Push sent. Waiting for M-Pesa confirmation...");
 
-      const maxRetries = 6;
+      const maxRetries = 2;
       let retries = 0;
       let statusResponse = null;
 
       while (retries < maxRetries) {
-        await sleep(5000);
+        await sleep(6000);
         statusResponse = await checkMpesaStatus(stkResponse.CheckoutRequestID);
         console.log(`Status Check ${retries + 1}:`, statusResponse);
 

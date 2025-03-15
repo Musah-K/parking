@@ -31,6 +31,16 @@ const parkingSlotsResolvers = {
             } catch (error) {
                 throw new Error(error.message)    
             }
+        },
+        userSlots: async(_, __, context)=>{
+            try {
+                const user = await context.getUser();
+                const reservedSpaces = await ParkingSlot.find({bookedBy: user._id});
+                return reservedSpaces;
+                
+            } catch (error) {
+                throw new Error(error.message)
+            }
         }
 
     },
@@ -75,6 +85,25 @@ const parkingSlotsResolvers = {
                 return {message:"Parking Slot deleted"};
             } catch (error) {
                 throw new Error(error.message)
+            }
+        },
+        removeExpiredSlots: async()=>{
+            try {
+                const now = new Date().toISOString().split('T')[0];
+                const update = await ParkingSlot.updateMany({validTill: {$lt: now}, isAvailable: false},{
+                    $set:{
+                        isAvailable: true,
+                        bookedBy: null,
+                        paymentId: null,
+                        validFrom: null,
+                        validTill: null,
+                    }
+                })
+
+                return update
+            } catch (error) {
+                throw new Error(error.message)
+                
             }
         },
 

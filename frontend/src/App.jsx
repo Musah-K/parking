@@ -1,34 +1,68 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
+import toast, { Toaster } from "react-hot-toast"
+import { Route, Routes, useNavigate, Navigate } from "react-router-dom"
+import Login from "./pages/Login"
+import Register from "./pages/Register"
+import Home from "./pages/Home"
+import NotFound from "./pages/NotFound"
+import { useMutation, useQuery } from "@apollo/client"
+import { Authenticate } from "./graphql/query/userQuery"
+import { useEffect } from "react"
+import Client from "./pages/Client"
+import Employee from "./pages/Employee"
+import Admin from "./pages/Admin"
+import { UpdateExpired } from "./graphql/mutations/parkingSlotsMutation"
+import Reserved from "./pages/Client/Reserved"
+import Reserve from "./pages/Client/Reserve"
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [removeExpiredSlots, {loading: loadingUpdate, error}] = useMutation(UpdateExpired);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await removeExpiredSlots();
+      } catch (error) {
+        toast.error(error.message)
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+
+    token ? children : <Navigate to='/login' />;
+
+  const {data: userData, loading: loadingUser } = useQuery(Authenticate)
+  let authenticated = 'user'
+
+  useEffect(()=>{
+    userData?.authUser? navigate('/'): navigate('/login')
+    authenticated = userData?.authUser?.role;
+  },[userData,navigate])
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="">
+       <Routes>
+      <Route path="/" element={<Home user={userData?.authUser} />}>
+        {authenticated === "user" ? (
+          <Route element={<Client user={userData?.authUser} />}>
+            <Route path="" element={<Reserved />} />
+            <Route path="reserve" element={<Reserve />} />
+          </Route>
+        ) : authenticated === "worker" ? (
+          <Route index element={<Employee />} />
+        ) : (
+          <Route index element={<Admin />} />
+        )}
+      </Route>
+      <Route path="login" element={<Login />} />
+      <Route path="register" element={<Register />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+      <Toaster />
+    </div>
   )
 }
 
