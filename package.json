@@ -4,10 +4,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "backend": "nodemon backend/index.js",
-    "fullstack": "concurrently \"npm run backend\" \"cd frontend && npm run dev\""
-  },
+  "backend": "node backend/index.js",
+  "frontend": "cd frontend && npm install && npm run build",
+  "fullstack": "npm run frontend && npm run backend"
+},
   "author": "moses karani",
   "license": "ISC",
   "description": "",
