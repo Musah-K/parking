@@ -19,7 +19,7 @@ import configPassport from './config/passport.js';
 config();
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:7000',
     credentials: true,
 }))
 
@@ -65,7 +65,8 @@ await server.start();
 
 app.use('/graphql', express.json(), expressMiddleware(server,{context:({req,res})=>buildContext({req,res}),}));
 
-await new Promise(resolve => httpServer.listen({port:7000}, resolve))
+const PORT = process.env.PORT || 7000;
+await new Promise((resolve) => httpServer.listen(PORT, '0.0.0.0', resolve));
 
 await connectDb();
 
