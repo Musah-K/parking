@@ -7,15 +7,14 @@
   "description": "Full-stack Parking Management System",
   "license": "ISC",
   "scripts": {
-    "start": "node server/server.js",
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "backend": "nodemon server/server.js",
-    "frontend": "vite",
-    "build": "npm run frontend-build && npm run backend-build",
-    "frontend-build": "cd client && npm install && npm run build",
-    "backend-build": "npm install",
-    "lint": "cd client && npm run lint"
-  },
+  "start": "node server/server.js",
+  "dev": "concurrently \"nodemon server/server.js\" \"vite\"",
+  "backend": "nodemon server/server.js",
+  "frontend": "vite",
+  "build": "vite build",
+  "lint": "eslint .",
+  "preview": "vite preview"
+},
   "dependencies": {
     "@apollo/client": "^3.13.1",
     "@apollo/server": "^4.11.3",

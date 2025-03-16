@@ -2,6 +2,7 @@ import express from 'express';
 import { config } from 'dotenv';
 import http from 'http';
 import path from 'path';
+import { fileURLToPath } from 'url';  // <-- Add this
 import ConnectMongo from 'connect-mongodb-session';
 import session from 'express-session';
 import passport from 'passport';
@@ -18,20 +19,24 @@ import configPassport from './config/passport.js';
 
 // Load environment variables
 config();
+
 const app = express();
 const httpServer = http.createServer(app);
-const __dirname = path.resolve();
 
-// ✅ Allow CORS with credentials
+// Use correct __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Allow CORS with credentials
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
 }));
 
-// ✅ Connect to MongoDB
+// Connect to MongoDB
 await connectDb();
 
-// ✅ Set up MongoDB session store
+// Set up MongoDB session store
 const MongoSessionStore = ConnectMongo(session);
 configPassport();
 
@@ -51,29 +56,30 @@ app.use(
     cookie: {
       maxAge: 1000 * 60 * 60 * 24, // 1 day
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Secure only in production
+      secure: process.env.NODE_ENV === 'production',
     },
   })
 );
 
-// ✅ Initialize Passport
+// Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ✅ Serve React static files
-app.use(express.static(path.join(__dirname, '../client/dist')));
+// Serve React static files from the build output (dist folder)
+// Now, __dirname is the directory of server.js (e.g., .../parking/server)
+// So, '../dist' correctly points to .../parking/dist
+app.use(express.static(path.join(__dirname, '../dist')));
 
-// ✅ Set up Apollo Server
+// Set up Apollo Server
 const server = new ApolloServer({
   typeDefs: mergedTypeDefs,
   resolvers: mergedResolvers,
   introspection: true,
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
-
 await server.start();
 
-// ✅ GraphQL endpoint
+// GraphQL endpoint
 app.use(
   '/graphql',
   express.json(),
@@ -82,12 +88,12 @@ app.use(
   })
 );
 
-// ✅ Fallback to React app for unknown routes
+// Fallback: Serve React app for any unknown routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
-// ✅ Start the server
+// Start the server
 const PORT = process.env.PORT || 7000;
 await new Promise((resolve) => httpServer.listen(PORT, '0.0.0.0', resolve));
 
