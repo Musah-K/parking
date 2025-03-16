@@ -24,7 +24,7 @@ const __dirname = path.resolve(); // Needed for static file serving
 
 // ✅ Allow CORS with credentials
 app.use(cors({
-    origin: '*',
+    origin: ['https://parking-1-6wr9.onrender.com/'],
     credentials: true,
 }))
 
@@ -57,8 +57,6 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ✅ Serve static files from React build
-app.use(express.static(path.join(__dirname, 'client/dist')));
 
 // ✅ Set up Apollo Server
 const server = new ApolloServer({
@@ -79,10 +77,6 @@ app.use(
   })
 );
 
-// ✅ Catch-all route: Serve React app for any unmatched path
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
-});
 
 // ✅ Connect to MongoDB
 await connectDb();
