@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 
 const client = new ApolloClient({
-  link: new HttpLink({ uri: 'https://parking-w7xf.onrender.com/graphql',
+  link: new HttpLink({ uri: 'https://parking-w7xf.onrender.com',
     credentials: 'include', }),
   cache: new InMemoryCache(),
 });
