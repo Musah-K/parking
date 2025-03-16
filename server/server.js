@@ -20,13 +20,16 @@ import configPassport from './config/passport.js';
 config();
 const app = express();
 const httpServer = http.createServer(app);
-const __dirname = path.resolve(); // Needed for static file serving
+const __dirname = path.resolve();
 
 // ✅ Allow CORS with credentials
 app.use(cors({
-    origin: ['https://parking-1-6wr9.onrender.com/'],
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
-}))
+}));
+
+// ✅ Connect to MongoDB
+await connectDb();
 
 // ✅ Set up MongoDB session store
 const MongoSessionStore = ConnectMongo(session);
@@ -48,7 +51,7 @@ app.use(
     cookie: {
       maxAge: 1000 * 60 * 60 * 24, // 1 day
       httpOnly: true,
-      secure: true
+      secure: process.env.NODE_ENV === 'production', // Secure only in production
     },
   })
 );
@@ -57,12 +60,14 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// ✅ Serve React static files
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // ✅ Set up Apollo Server
 const server = new ApolloServer({
   typeDefs: mergedTypeDefs,
   resolvers: mergedResolvers,
-  introspection: true, // Allow GraphQL Playground in production
+  introspection: true,
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 
@@ -77,9 +82,10 @@ app.use(
   })
 );
 
-
-// ✅ Connect to MongoDB
-await connectDb();
+// ✅ Fallback to React app for unknown routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+});
 
 // ✅ Start the server
 const PORT = process.env.PORT || 7000;
