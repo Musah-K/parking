@@ -2,7 +2,7 @@ import express from 'express';
 import { config } from 'dotenv';
 import http from 'http';
 import path from 'path';
-import { fileURLToPath } from 'url';  // <-- Add this
+import { fileURLToPath } from 'url';
 import ConnectMongo from 'connect-mongodb-session';
 import session from 'express-session';
 import passport from 'passport';
@@ -23,14 +23,30 @@ config();
 const app = express();
 const httpServer = http.createServer(app);
 
-// Use correct __dirname for ES modules
+// Correct __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Allow CORS with credentials
+/*
+  Explicitly set CORS headers:
+  This middleware forces the CORS headers to be set as specified.
+*/
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// Also set up CORS via the cors package (for safety)
+// Note: With credentials disabled, '*' is allowed.
 app.use(cors({
-    origin: "*",
-    credentials: false,
+  origin: "*",
+  credentials: false,
 }));
 
 // Connect to MongoDB
@@ -44,7 +60,6 @@ const store = new MongoSessionStore({
   uri: process.env.MONGO_URI,
   collection: 'sessions',
 });
-
 store.on('error', (error) => console.error('Session store error:', error));
 
 app.use(
@@ -61,13 +76,15 @@ app.use(
   })
 );
 
-// Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Serve React static files from the build output (dist folder)
-// Now, __dirname is the directory of server.js (e.g., .../parking/server)
-// So, '../dist' correctly points to .../parking/dist
+// Assuming your structure is now:
+// project-root/
+// ├── dist/         <-- Build output (created by Vite)
+// ├── server/       <-- This file is in server/
+// └── package.json  (unified at project root)
 app.use(express.static(path.join(__dirname, '../dist')));
 
 // Set up Apollo Server
