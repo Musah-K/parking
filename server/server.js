@@ -19,7 +19,7 @@ import configPassport from './config/passport.js';
 config();
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'https://parking-1-6wr9.onrender.com',
     credentials: true,
 }))
 
