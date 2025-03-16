@@ -29,7 +29,7 @@ const __dirname = path.dirname(__filename);
 
 // Allow CORS with credentials
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL|| 'https://parking-tzud.onrender.com' || 'http://localhost:3000',
     credentials: true,
 }));
 
